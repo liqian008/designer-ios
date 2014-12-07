@@ -1,0 +1,46 @@
+
+#import <Foundation/Foundation.h>
+#import "ApiResult.h"
+
+@interface AbstractApi:NSObject
+
+//abstract抽象方法
+
+/**
+ * api url
+ * @return
+ */
+-(NSString*) getRequestUri;
+
+/**
+ * 此api是否需要登录用户才能操作
+ */
+-(BOOL) needAuth;
+
+/*abstract抽象方法，统一后可均使用post*/
+-(NSString*) getRequestMethod;
+
+
+/*abstract抽象方法，子类需要构造业务数据*/
+-(void) fillDataMap: (NSMutableDictionary*) paramMap;
+
+/*abstract抽象方法，子类需要构造apiMethodName*/
+-(NSString *) getApiMethodName;
+
+/*abstract抽象方法 子类处理response*/
+-(ApiResult *) processApiResult: (int)result errorcode: (int) errorcode message: (NSString *) message dataStr: (NSString *) dataStr;
+
+/*构造请求map*/
+-(NSDictionary*) getParamMap;
+
+
+/*是否是多媒体请求*/
+-(BOOL)isMultipart;
+
+/*设置多媒体请求*/
+-(void)setMultipart: (BOOL)multipart;
+
+-(ApiResult*) processResponse: (NSString*) responseStr;
+
+
+@end
