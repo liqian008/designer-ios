@@ -8,6 +8,7 @@
 
 #import "AppDelegate.h"
 #import "SplashViewController.h"
+#import "MD5Util.h"
 
 @interface AppDelegate ()
 
@@ -18,6 +19,9 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    //NSLog(@"md5: %@", [MD5Util md5:@"1234"]);
+    
     
     UIViewController *splashVc = [[SplashViewController alloc]init];
     self.window.rootViewController = splashVc;
