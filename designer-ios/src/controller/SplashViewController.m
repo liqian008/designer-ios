@@ -12,6 +12,11 @@
 #import "MainTab1ViewController.h"
 #import "MainTab2ViewController.h"
 #import "JSONKit.h"
+#import "AFHTTPRequestOperationManager.h"
+#import "SystemCheckApi.h"
+#import "ApiManager.h"
+#import "ApiResult.h"
+
 
 @interface SplashViewController ()
 
@@ -22,7 +27,13 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    //临时测试网络请求
+    SystemCheckApi *systemCheckApi = [[SystemCheckApi alloc]init];
+    ApiResult *apiResult = [ApiManager invoke:systemCheckApi];
 
+    
+    
+    
     //解析json demo
 //    NSString *jsonString = @"[{\"age\":18,\"book\":{\"price\":23.2,\"title\":\"booooooook1\"},\"name\":\"samyou\"},{\"age\":22,\"book\":{\"price\":21,\"title\":\"booooooook2\"},\"name\":\"samsam\"}]";
 //    NSData *jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];

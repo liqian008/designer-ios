@@ -14,6 +14,6 @@
 @interface ApiManager:NSObject
 
 //调用api
--(ApiResult*)invoke:(AbstractApi *)api;
++(ApiResult*)invoke:(AbstractApi *)api;
 
 @end

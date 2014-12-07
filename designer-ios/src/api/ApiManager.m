@@ -12,15 +12,16 @@
 #import "ApiManager.h"
 #import "MD5Util.h"
 
+#import "AFHTTPRequestOperationManager.h"
+
 @interface ApiManager()
 
 @end
 
-
 @implementation ApiManager
 
 //调用api
--(ApiResult*)invoke:(AbstractApi *)api{
++(ApiResult*)invoke:(AbstractApi *)api{
     
     //检查网络状态
     BOOL networkAvailable = true;
@@ -28,24 +29,37 @@
        
     }
     
-    if(api.needAuth){
+    if([api needAuth]){
         //游客的操作检查
     }
     
-    NSString *requestUri = api.getRequestUri;
+    NSString *requestUri = [api getRequestUri];
     NSString *response = nil;
-    NSMutableDictionary  *apiParamMap = api.getParamMap;
-    NSString *method = api.getRequestMethod;
+    NSDictionary  *apiParamMap = [api getParamMap];
+    NSString *method = [api getRequestMethod];
     //构造完整请求参数
-    NSMutableDictionary  *fullParamMap = [self buildFullParam:apiParamMap];
+    //NSMutableDictionary  *fullParamMap = [self buildFullParam:apiParamMap];
+    NSMutableDictionary  *fullParamMap =  [self buildFullParam:apiParamMap];
     
     //判断是否是multipart请求
     bool isMultipart = api.isMultipart;
     if(!isMultipart){
+        AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+        manager.responseSerializer.acceptableContentTypes = [NSSet setWithObject:@"text/plain"];
+        
+        
         if([@"post" isEqual:[method lowercaseString]]){
-                //response = HttpClientUtil.httpGet(requestUri, fullParamMap);
+            [manager POST:requestUri parameters:fullParamMap success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                NSLog(@"JSON: %@", responseObject);
+            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                NSLog(@"Error: %@", error);
+            }];
         }else{
-//               response = HttpClientUtil.httpPost(requestUri, fullParamMap);
+            [manager GET:requestUri parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                NSLog(@"JSON: %@", responseObject);
+            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                NSLog(@"Error: %@", error);
+            }];
         }
     }else{
 //            String imagePath = api.getFilePath();
@@ -61,56 +75,61 @@
 }
 
 /*构造http请求参数dict，增加sig等*/
--(NSMutableDictionary *) buildFullParam: (NSMutableDictionary*)requestParamMap{
++(NSMutableDictionary *) buildFullParam: (NSDictionary*) requestParamMap{
     
-//    TreeMap<String, String> fullParamMap = new TreeMap<String, String>();
-//    if (param!= null&&param.size()>0) {
-//        fullParamMap.putAll(param);
-//    }
-//    String appVersionName = Config.APP_VERSION_NAME;
-//    int appVersionCode = Config.APP_VERSION_CODE;
-//    String appId = Config.APP_ID;
-//    String secretKey = Config.APP_SECRET_KEY;
+    NSMutableDictionary *fullParamMap = [NSMutableDictionary dictionary];
+    //添加业务数据
+    [fullParamMap addEntriesFromDictionary:requestParamMap];
     
-    
-    [requestParamMap setValue:@"" forKey:@"app_id"];
-    [requestParamMap setValue:@"" forKey:@"v_name"];
-    [requestParamMap setValue:@"" forKey:@"v_code"];
-    [requestParamMap setValue:@"" forKey:@"call_id"];
+    [fullParamMap setValue:@"2" forKey:@"app_id"];
+    [fullParamMap setValue:@"1.0.0" forKey:@"v_name"];
+    [fullParamMap setValue:@"1" forKey:@"v_code"];
+    [fullParamMap setValue:@"1234" forKey:@"call_id"];
     
     
-//    for (Map.Entry<String, String> entry : fullParamMap.entrySet()) {
-//        sb.append(entry.getKey()).append('=').append(entry.getValue());
-//    }
+    [fullParamMap setValue:@"2" forKey:@"clientType"];
+    [fullParamMap setValue:@"1" forKey:@"versionCode"];
+    [fullParamMap setValue:@"jinwanr_ios" forKey:@"channel"];
     
-    //字典排序生成plainText
-    NSString *plainText = @"";
     
-    NSString *secretKey = @"secretkey";
-    NSString *value = [[self limitedString:plainText limit:500] stringByAppendingString:secretKey];
     
+    //取出keys
+    NSArray *fullParamKeys = [fullParamMap allKeys];
+    //对keys进行字典排序
+    NSArray *sortedKeys = [fullParamKeys sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+    //NSMutableArray *sortedValues = [[NSMutableArray alloc]init];
+    
+    //排序后的valueArray
+    
+    NSString *paramPlainText = @"";//初始化为空串
+    //拼接参数key-value
+    for(id key in sortedKeys){
+        id value = [fullParamMap objectForKey:key];
+        
+        paramPlainText = [paramPlainText stringByAppendingString:key];
+        paramPlainText = [paramPlainText stringByAppendingString:@"="];
+        paramPlainText = [paramPlainText stringByAppendingString:value];
+    }
+    
+    NSString *secretKey = @"1qaz2wsx";
+    NSLog(@"======secretKey: %@", secretKey);
+    
+    NSString *value = [[self limitedString:paramPlainText limit:500] stringByAppendingString:secretKey];
     NSLog(@"======value: %@", value);
     //计算签名
     NSString *sig = [MD5Util md5:value];
-    
-    NSLog(@"======secretKey: %@", secretKey);
     NSLog(@"======sig: %@", sig);
     
-    [requestParamMap setValue:sig forKey:@"sig"];
-    
-//    fullParamMap.put("sig", sig);
-    
-    return requestParamMap;
+    [fullParamMap setValue:sig forKey:@"sig"];
+    return fullParamMap;
 }
 
--(NSString *)limitedString:(NSString *) str limit:(int) limit{
++(NSString *)limitedString:(NSString *) str limit:(int) limit{
     if([str length]>limit){
         return [str substringToIndex:limit];
     }
     return str;
 }
-
-
 
 @end
 

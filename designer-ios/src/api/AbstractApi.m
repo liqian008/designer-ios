@@ -15,7 +15,7 @@
 @implementation AbstractApi:NSObject
 
 -(NSString*) getRequestUri{
-    return @"";
+    return @"http://mobile.jinwanr.com/api";
 }
 
 -(BOOL) needAuth{
@@ -30,12 +30,12 @@
 
 
 /*抽象方法，apiMethodName*/
-//-(NSString *) getApiMethodName{
-//    return nil;
-//}
+-(NSString *) getApiMethodName{
+    return nil;
+}
 
 /*abstract抽象方法，子类需要构造业务数据*/
--(void) fillDataMap: (NSMutableDictionary*) paramMap{
+-(void) fillDataMap: (NSDictionary*) paramMap{
     
 }
 
@@ -45,14 +45,15 @@
 }
 
 /*构造请求map*/
--(NSMutableDictionary*) getParamMap{
+-(NSDictionary*) getParamMap{
     //构造method名称
     NSString * apiMethodName = [self getApiMethodName];
-    NSMutableDictionary *paramMap = [NSMutableDictionary dictionaryWithObjectsAndKeys: apiMethodName, @"cmd_method", nil];
+    //将method参数加入
+    NSDictionary *paramMap = [NSMutableDictionary dictionaryWithObjectsAndKeys: apiMethodName, @"cmd_method", nil];
     
-    //subApi构造业务请求参数
+    //填充subApi的业务请求参数
     fillDataMap:paramMap;
-    return nil;
+    return paramMap;
 }
 
 
