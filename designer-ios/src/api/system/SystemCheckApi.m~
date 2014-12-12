@@ -51,8 +51,7 @@
 /*abstract抽象方法，子类需要构造业务数据*/
 -(NSDictionary *) getBusinessParamMap{
    NSMutableDictionary *businessMap = [NSMutableDictionary dictionary];
-   //构造业务参数
-   
+    [businessMap addEntriesFromDictionary:paramMap];
 }
 
 //*abstract抽象方法，子类需要构造业务数据*/
